@@ -4,9 +4,9 @@ import Lanes from './Lanes.jsx';
 import LaneActions from '../actions/LaneActions';
 import LaneStore from '../stores/LaneStore';
 import {DragDropContext} from 'react-dnd';
-import HTML5backend from 'react-dnd/modules/backends/HTML5';
+import HTML5Backend from 'react-dnd/modules/backends/HTML5';
 
-@DragDropContext(HTML5backend )
+@DragDropContext(HTML5backend)
 export default class App extends React.Component {
 
   render() {
