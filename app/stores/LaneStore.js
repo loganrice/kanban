@@ -2,6 +2,7 @@ import uuid from 'node-uuid';
 import alt from '../libs/alt';
 import LaneActions from '../actions/LaneActions';
 import NoteStore from './NoteStore';
+import update from 'react/lib/update';
 
 class LaneStore {
   constructor() {
@@ -44,6 +45,15 @@ class LaneStore {
   }
 
   attachToLane({laneId, noteId}) {
+    const lanes = this.lanes;
+    const targetId = this.findLane(laneId);
+    
+    if(targetId < 0) {
+      return;
+    }
+    
+    this.removeNote(noteId);
+
     if(!noteId) {
       this.waitFor(NoteStore);
       noteId = NoteStore.getState().notes.slice(-1)[0].id;
@@ -65,6 +75,21 @@ class LaneStore {
     else {
       console.warn("Already attached note to lane", lanes);
     }
+  }
+  removeNote(noteId) {
+    const lanes = this.lanes;
+    const removeLane = lanes.filter((lane) => {
+
+    })[0];
+
+    if(!removeLane) {
+
+    }
+
+    const removeNoteIndex = removeLane.notes.indexOf(noteId);
+
+    removeLane.notes = removeLane.notes.slice(0, removeNoteIndex).
+      concat(removeLane.notes.slice(removeNoteIndex + 1));
   }
   detachFromLane({laneId, noteId}) {
     const lanes = this.lanes;
@@ -96,6 +121,32 @@ class LaneStore {
     }
 
     return laneIndex;
+  }
+  move({sourceId, targetId}) {
+    console.log("moving", sourceId);
+    const lanes = this.lanes;
+    const sourceLane = lanes.filter((lane) => {
+      return lane.notes.indexOf(sourceId) >= 0;
+    })[0];
+    const targetLane = lanes.filter((lane) => {
+      return lane.notes.indexOf(targetId) >= 0;
+    })[0];
+    const sourceNoteIndex = sourceLane.notes.indexOf(sourceId);
+    const targetNoteIndex = targetLane.notes.indexOf(targetId);
+
+    if(sourceLane === targetLane) {
+      sourceLane.notes = update(sourceLane.notes, {
+        $splice: [
+          [sourceNoteIndex, 1],
+          [targetNoteIndex, 0, sourceId]
+        ]
+      });
+    }
+    else {
+      sourceLane.notes.splice(sourceNoteIndex, 1);
+      targetLane.notes.splice(targetNoteIndex, 0, sourceId);
+    }
+    this.setState({lanes});
   }
 }
 
